@@ -1,11 +1,11 @@
 export async function onRequest(context) {
-  const { request, env } = context;
+  const { request } = context;
 
   if (request.method === "OPTIONS") {
     return new Response(null, {
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type"
       }
     });
@@ -15,26 +15,22 @@ export async function onRequest(context) {
 
   if (request.method === "GET") {
     const res = await fetch(GAS_URL);
-    const text = await res.text();
-    return new Response(text, {
+    return new Response(await res.text(), {
       headers: { "Content-Type": "application/json" }
     });
   }
 
   if (request.method === "POST") {
     const body = await request.text();
-
     const res = await fetch(GAS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body
     });
-
-    const text = await res.text();
-    return new Response(text, {
+    return new Response(await res.text(), {
       headers: { "Content-Type": "application/json" }
     });
   }
 
-  return new Response("Method not allowed", { status: 405 });
+  return new Response("Not allowed", { status: 405 });
 }
