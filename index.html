@@ -118,121 +118,40 @@ th {
 </div>
 
 <script>
-/* ===== KONFIG ===== */
-const API_TOKEN = "mujahadah2026#cfpagesTokene";
-const API_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec?token="+API_TOKEN+";
+const API_URL = "/api";
 
-let DATA = {};
-let anggota = [];
-
-/* ===== LOAD DATA ===== */
-document.addEventListener("DOMContentLoaded", loadData);
-
-async function loadData() {
-  try {
-    const res = await fetch(API_URL);
-
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
-    }
-
-    const json = await res.json();
-
-    if (json.status === "error") {
-      dataTabel.innerHTML =
-        "<b style='color:red'>" + json.message + "</b>";
-      return;
-    }
-
-    DATA = json;
-    isiFilter();
-    renderFiltered();
-
-  } catch (err) {
-    dataTabel.innerHTML =
-      "<b style='color:red'>Gagal load data dari server</b>";
-  }
-}
-
-/* ===== FILTER ===== */
-function isiFilter() {
-  const s = document.getElementById("filterKelompok");
-  s.innerHTML = '<option value="">Semua Kelompok</option>';
-  Object.keys(DATA).forEach(k => {
-    s.innerHTML += `<option>${k}</option>`;
-  });
-}
-
-function renderFiltered() {
-  const pilih = filterKelompok.value;
-  const sumber = pilih ? { [pilih]: DATA[pilih] } : DATA;
-
-  let html = "";
-  for (const [k, o] of Object.entries(sumber)) {
-    html += `
-      <h4>${k}</h4>
-      <div><b>Pimpinan:</b> ${o.pimpinan}</div>
-      <div><b>No HP:</b> ${o.no_hp}</div>
-      <table>
-        <tr><th>Nama</th><th>JK</th><th>Kategori</th></tr>
-        ${o.anggota.map(a =>
-          `<tr><td>${a[0]}</td><td>${a[1]}</td><td>${a[2]}</td></tr>`
-        ).join("")}
-      </table><br>
-    `;
-  }
-  dataTabel.innerHTML = html || "<i>Belum ada data</i>";
-}
-
-/* ===== FORM ===== */
-function tambahAnggota() {
-  const i = anggota.length;
-  anggota.push({});
-  const d = document.createElement("div");
-  d.className = "row";
-  d.innerHTML = `
-    <input placeholder="Nama"
-      oninput="anggota[${i}].nama=this.value">
-    <select onchange="anggota[${i}].jk=this.value">
-      <option value="">JK</option>
-      <option>Laki-laki</option>
-      <option>Perempuan</option>
-    </select>
-    <select onchange="anggota[${i}].kategori=this.value">
-      <option value="">Kategori</option>
-      <option>Anak</option>
-      <option>Dewasa</option>
-    </select>
-  `;
-  listAnggota.appendChild(d);
-}
-
-const API_URL = "/api"; // Pages Functions
-const TOKEN = "Imujahadah2026#cfpagesTokene"; // sementara hardcode utk test  
 async function kirim() {
+  const payload = {
+    nama_kelompok: document.getElementById("nama_kelompok").value,
+    pimpinan: document.getElementById("pimpinan").value,
+    no_hp: document.getElementById("hp").value,
+    anggota: anggota
+  };
+
   const res = await fetch(API_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + TOKEN
-    },
-    body: JSON.stringify({
-      nama_kelompok: "Kelompok A",
-      no_hp: "08123456789",
-      anggota: [
-        { nama: "Budi", jk: "L", kategori: "A" }
-      ]
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
   });
 
-  const data = await res.json();
-  console.log(data);
+  const json = await res.json();
+
+  if (json.status === "ok") {
+    alert("✅ Data masuk");
+    loadData();
+  } else {
+    alert("❌ " + json.message);
+  }
 }
 
-kirim();
-
+async function loadData() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  DATA = data;
+  isiFilter();
+  renderFiltered();
+}
 </script>
 
 </body>
 </html>
-
