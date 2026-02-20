@@ -120,7 +120,7 @@ th {
 <script>
 /* ===== KONFIG ===== */
 const API_TOKEN = "mujahadah2026#cfpagesTokene";
-const API_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec?token="+API_TOKEN+"}";
+const API_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec?token="+API_TOKEN+";
 
 let DATA = {};
 let anggota = [];
@@ -207,32 +207,32 @@ function tambahAnggota() {
   listAnggota.appendChild(d);
 }
 
+const API_URL = "/api"; // Pages Functions
+const TOKEN = "Imujahadah2026#cfpagesTokene"; // sementara hardcode utk test  
 async function kirim() {
-  const payload = {
-    nama_kelompok: document.getElementById("nama_kelompok").value,
-    pimpinan: document.getElementById("pimpinan").value,
-    no_hp: document.getElementById("hp").value,
-    anggota: anggota
-  };
-
   const res = await fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify(payload)
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + TOKEN
+    },
+    body: JSON.stringify({
+      nama_kelompok: "Kelompok A",
+      no_hp: "08123456789",
+      anggota: [
+        { nama: "Budi", jk: "L", kategori: "A" }
+      ]
+    })
   });
 
-  const json = await res.json();
-
-  if (json.status === "ok") {
-    alert("✅ Data berhasil dikirim");
-    anggota = [];
-    document.getElementById("listAnggota").innerHTML = "";
-    loadData();
-  } else {
-    alert("❌ " + json.message);
-  }
+  const data = await res.json();
+  console.log(data);
 }
+
+kirim();
 
 </script>
 
 </body>
 </html>
+
