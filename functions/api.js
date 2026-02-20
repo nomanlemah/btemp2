@@ -1,26 +1,40 @@
 export async function onRequest(context) {
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec";
-  const TOKEN = "ISI_TOKEN_SAMA_DENGAN_GAS";
+  const { request, env } = context;
 
-  const req = context.request;
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
+    });
+  }
 
-  // Teruskan request ke GAS
-  const res = await fetch(GAS_URL, {
-    method: req.method,
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-TOKEN": TOKEN
-    },
-    body: req.method === "POST"
-      ? await req.text()
-      : null
-  });
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec"; // GANTI
 
-  return new Response(await res.text(), {
-    status: res.status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*"
-    }
-  });
+  if (request.method === "GET") {
+    const res = await fetch(GAS_URL);
+    const text = await res.text();
+    return new Response(text, {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  if (request.method === "POST") {
+    const body = await request.text();
+
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body
+    });
+
+    const text = await res.text();
+    return new Response(text, {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  return new Response("Method not allowed", { status: 405 });
 }
