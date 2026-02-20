@@ -120,12 +120,19 @@ th {
 <script>
 const API_URL = "/api";
 
+async function loadData() {
+  const res = await fetch(API_URL);
+  DATA = await res.json();
+  isiFilter();
+  renderFiltered();
+}
+
 async function kirim() {
   const payload = {
-    nama_kelompok: document.getElementById("nama_kelompok").value,
-    pimpinan: document.getElementById("pimpinan").value,
-    no_hp: document.getElementById("hp").value,
-    anggota: anggota
+    nama_kelompok: nama_kelompok.value,
+    pimpinan: pimpinan.value,
+    no_hp: hp.value,
+    anggota
   };
 
   const res = await fetch(API_URL, {
@@ -135,23 +142,10 @@ async function kirim() {
   });
 
   const json = await res.json();
-
-  if (json.status === "ok") {
-    alert("✅ Data masuk");
-    loadData();
-  } else {
-    alert("❌ " + json.message);
-  }
-}
-
-async function loadData() {
-  const res = await fetch(API_URL);
-  const data = await res.json();
-  DATA = data;
-  isiFilter();
-  renderFiltered();
+  alert(json.status === "ok" ? "✅ Terkirim" : json.message);
 }
 </script>
 
 </body>
 </html>
+
