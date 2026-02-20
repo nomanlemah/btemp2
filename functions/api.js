@@ -1,19 +1,23 @@
-export async function onRequest(context) {
-  const { request, env } = context;
+export default {
+  async fetch(request, env) {
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwsLXWVNrLhWNZtwxB0n-0CRT9E_pGQA1eIJhw00rb9fIIfiLsGd6ChCFyorXJOxRH-/exec";
-  const TOKEN = env.API_TOKEN; // dari Secret
+    const auth = request.headers.get("Authorization");
+    if (auth !== `Bearer ${env.API_TOKEN}`) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401 }
+      );
+    }
 
-  const url = new URL(GAS_URL);
-  url.searchParams.set("token", TOKEN);
+    // forward ke GAS
+    const gas = await fetch(env.GAS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: await request.text()
+    });
 
-  const newRequest = new Request(url.toString(), {
-    method: request.method,
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: request.method === "POST" ? await request.text() : null
-  });
-
-  return fetch(newRequest);
+    return new Response(await gas.text(), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 }
